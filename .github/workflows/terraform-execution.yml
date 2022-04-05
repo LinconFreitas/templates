@@ -189,6 +189,7 @@ jobs:
 
     # Updates the PR with the plan destroy output
     - uses: actions/github-script@0.9.0
+      if: github.event_name == 'pull_request'
       env:
         PLAN: "${{ steps.plan-destroy.outputs.stdout }} ${{ steps.plan-destroy.outputs.stderr }}"
       with:
@@ -196,7 +197,7 @@ jobs:
         script: |
           const output = `## Terraform Plan Destroy:
           
-          #### Terraform Apply 📖\`${{ steps.plan-destroy.outcome }}\`
+          #### Terraform Plan Destroy 📖\`${{ steps.plan-destroy.outcome }}\`
           
           <details><summary>Show Apply</summary>
           
@@ -224,6 +225,7 @@ jobs:
     name: 'terraform-destroy'
     runs-on: ubuntu-latest
     needs: terraform-plan-destroy
+    if: github.event_name == 'pull_request'
 
     steps:
     
