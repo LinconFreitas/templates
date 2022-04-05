@@ -50,7 +50,7 @@ jobs:
     # Verify whether a configuration is syntactically valid and internally consistent.
     - name: Terraform Validate
       id: validate
-      run: make validate
+      run: make valid
       if: steps.init.outcome == 'success'
       continue-on-error: true
 
