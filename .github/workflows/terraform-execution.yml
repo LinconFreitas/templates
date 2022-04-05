@@ -138,7 +138,7 @@ jobs:
     # Change infrastructure according to Terraform configuration files.
     - name: Terraform Apply
       id: apply
-      run: ls -la
+      run: make apply
       continue-on-error: true
 
     # Updates the PR with the apply output.
@@ -184,44 +184,10 @@ jobs:
 
     steps:
     
-    # Generates an execution plan for Terraform to preview changes in the infrastructure.
+    # Generates an execution plan for Terraform to preview changes in the infrastructure (Plan Destroy).
     - name: Terraform Plan Destroy
       id: plan-destroy
-      run: ls -la
-      continue-on-error: true
-
-    # Updates the PR with the plan destroy output.
-    - uses: actions/github-script@0.9.0
-      env:
-        PLAN: "${{ steps.plan-destroy.outputs.stdout }} ${{ steps.plan-destroy.outputs.stderr }}"
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const output = `## Terraform Plan Destroy:
-          
-          #### Terraform Plan Destroy 📖\`${{ steps.plan-destroy.outcome }}\`
-          
-          <details><summary>Show Apply</summary>
-          
-          \`\`\`terraform
-          ${process.env.PLAN}
-          \`\`\`
-
-          </details>
-          
-          *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
-          
-          github.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: output
-          })
-
-    # Check if the plan destroy step has failed.
-    - name: Validate Status
-      if: steps.plan-destroy.outcome != 'success'
-      run: exit 1
+      run: make pland
 
   terraform-destroy:
     name: 'terraform-destroy'
@@ -235,38 +201,4 @@ jobs:
     # Destroy the created infrastructure.
     - name: Terraform Destroy
       id: destroy
-      run: ls -la
-      continue-on-error: true
-
-    # Updates the PR with the destroy output.
-    - uses: actions/github-script@0.9.0
-      env:
-        PLAN: "${{ steps.destroy.outputs.stdout }} ${{ steps.destroy.outputs.stderr }}"
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const output = `## Terraform Destroy:
-          
-          #### Terraform Destroy 📖\`${{ steps.destroy.outcome }}\`
-          
-          <details><summary>Show Destroy</summary>
-          
-          \`\`\`terraform
-          ${process.env.DESTROY}
-          \`\`\`
-
-          </details>
-          
-          *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
-          
-          github.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: output
-          })
-
-    # Check if the plan destroy step has failed.
-    - name: Validate Status
-      if: steps.destroy.outcome != 'success'
-      run: exit 1
+      run: make destroy
