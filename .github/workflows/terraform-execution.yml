@@ -125,6 +125,13 @@ jobs:
     - name: Validate Status
       if: steps.fmt.outcome != 'success' || steps.init.outcome != 'success' || steps.validate.outcome != 'success' || steps.plan.outcome != 'success'
       run: exit 1
+    
+    # Saving plan output for Apply job
+    - uses: actions/upload-artifact@v3
+      with:
+        name: plan
+        path: plan.out
+        retention-days: 1
 
   terraform-apply:
     name: 'terraform-apply'
@@ -134,7 +141,13 @@ jobs:
     environment: ${{ github.base_ref }}
 
     steps:
-    
+
+    # Saving plan output for Apply job
+    - uses: actions/download-artifact@v3
+      with:
+        name: plan
+        path: plan.out
+
     # Change infrastructure according to Terraform configuration files.
     - name: Terraform Apply
       id: apply
